@@ -10,7 +10,7 @@ import { useEffect } from "react";
 import CalendarHeatmap from "@/components/modules/CalendarHeatmap";
 
 const NAV_ITEMS = [
-  { label: "Index", href: "/index", key: "I", icon: "≡" },
+  { label: "Index", href: "/overview", key: "I", icon: "≡" },
   { label: "Future Log", href: "/future-log", key: "F", icon: "⟩" },
   { label: "Monthly Log", href: `/monthly/${currentMonthISO()}`, key: "M", icon: "▪" },
   { label: "Daily Log", href: `/daily/${todayISO()}`, key: "D", icon: "◦" },

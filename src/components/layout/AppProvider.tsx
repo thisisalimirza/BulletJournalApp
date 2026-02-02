@@ -59,7 +59,7 @@ export default function AppProvider({ children }: { children: ReactNode }) {
           case "d": nav(`/daily/${todayISO()}`); return;
           case "m": nav(`/monthly/${currentMonthISO()}`); return;
           case "f": nav("/future-log"); return;
-          case "i": nav("/index"); return;
+          case "i": nav("/overview"); return;
           case "c": nav("/collections"); return;
         }
       }

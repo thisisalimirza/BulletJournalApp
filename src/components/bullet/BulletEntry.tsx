@@ -12,7 +12,7 @@ function threadLinkHref(link: ThreadLink): string {
   if (id.startsWith("monthly-")) return `/monthly/${id.replace("monthly-", "")}`;
   if (id.startsWith("collection-")) return `/collections/${id.replace("collection-", "")}`;
   if (id.startsWith("future-")) return "/future-log";
-  return "/index";
+  return "/overview";
 }
 
 interface BulletEntryProps {

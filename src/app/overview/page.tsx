@@ -2,7 +2,7 @@
 
 import PageShell from "@/components/layout/PageShell";
 import IndexView from "@/components/modules/IndexView";
-export default function IndexPage() {
+export default function OverviewPage() {
   return (
     <PageShell title="Index" subtitle="Your table of contents — all pages auto-populate here">
       <IndexView />

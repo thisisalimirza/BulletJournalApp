@@ -28,7 +28,7 @@ export default function CommandPalette() {
 
   const commands = useMemo<Command[]>(() => {
     const cmds: Command[] = [
-      { id: "index", label: "Go to Index", hint: "g i", action: () => router.push("/index") },
+      { id: "index", label: "Go to Index", hint: "g i", action: () => router.push("/overview") },
       { id: "future", label: "Go to Future Log", hint: "g f", action: () => router.push("/future-log") },
       { id: "monthly", label: "Go to Monthly Log", hint: "g m", action: () => router.push(`/monthly/${currentMonthISO()}`) },
       { id: "daily-today", label: "Go to Today", hint: "g d", action: () => router.push(`/daily/${todayISO()}`) },
