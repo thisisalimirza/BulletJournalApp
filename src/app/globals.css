@@ -53,14 +53,40 @@
   --color-focus-ring: var(--focus-ring);
   --color-priority: var(--priority);
   --color-inspiration: var(--inspiration);
-  --font-sans: "Inter", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", "Geist Mono", monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
 }
 
 body {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-sans);
+  /* Prevent iOS text size adjustment */
+  -webkit-text-size-adjust: 100%;
+  /* Prevent double-tap zoom on interactive elements */
+  touch-action: manipulation;
+}
+
+/* iOS safe area variables */
+:root {
+  --sat: env(safe-area-inset-top);
+  --sab: env(safe-area-inset-bottom);
+  --sal: env(safe-area-inset-left);
+  --sar: env(safe-area-inset-right);
+}
+
+/* Prevent iOS overscroll bounce on the root */
+html, body {
+  overscroll-behavior: none;
+  height: 100%;
+}
+
+/* Minimum 44px touch targets for buttons on touch devices */
+@media (pointer: coarse) {
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 .dotted-grid {

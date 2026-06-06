@@ -8,9 +8,17 @@
     "build": "next build",
     "start": "next start",
     "electron": "electron .",
-    "lint": "eslint"
+    "lint": "eslint",
+    "build:ios": "next build && npx cap sync ios",
+    "cap:sync": "npx cap sync",
+    "cap:ios": "npx cap open ios",
+    "cap:add:ios": "npx cap add ios"
   },
   "dependencies": {
+    "@capacitor/core": "^5.7.8",
+    "@capacitor/haptics": "^5.0.8",
+    "@capacitor/keyboard": "^5.0.9",
+    "@capacitor/status-bar": "^5.0.8",
     "dexie": "^4.3.0",
     "framer-motion": "^12.29.2",
     "nanoid": "^5.1.6",
@@ -20,6 +28,8 @@
     "zustand": "^5.0.10"
   },
   "devDependencies": {
+    "@capacitor/cli": "^5.7.8",
+    "@capacitor/ios": "^5.7.8",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
