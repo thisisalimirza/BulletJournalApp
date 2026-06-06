@@ -6,7 +6,7 @@ import { useNavigationStore } from "@/lib/store/navigationStore";
 import { useBulletStore } from "@/lib/store/bulletStore";
 import { useShallow } from "zustand/react/shallow";
 import { todayISO, currentMonthISO } from "@/lib/dates";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import CalendarHeatmap from "@/components/modules/CalendarHeatmap";
 
 const NAV_ITEMS = [
@@ -29,6 +29,16 @@ export default function Sidebar() {
   const scopes = useBulletStore((s) => s.scopes);
   const collections = collectionIds.map((id) => scopes[id]).filter(Boolean);
 
+  // Track whether we're on a tablet-sized screen (md: 768px+)
+  const [isTablet, setIsTablet] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    setIsTablet(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsTablet(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
   // Auto-close sidebar on navigation on mobile
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 767px)");
@@ -37,30 +47,36 @@ export default function Sidebar() {
     }
   }, [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!sidebarOpen) return null;
+  // On tablet, sidebar is always visible regardless of sidebarOpen state
+  if (!sidebarOpen && !isTablet) return null;
 
   return (
     <>
-      {/* Mobile backdrop */}
-      <div
-        className="fixed inset-0 bg-black/30 z-30 md:hidden"
-        onClick={() => setSidebarOpen(false)}
-      />
-      <aside className="fixed inset-y-0 left-0 z-40 w-56 border-r border-border bg-sidebar-bg flex flex-col h-full md:relative md:z-auto">
+      {/* Mobile backdrop — only shown when manually opened on small screens */}
+      {!isTablet && sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/30 z-30"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+      <aside
+        className="fixed inset-y-0 left-0 z-40 w-56 border-r border-border bg-sidebar-bg flex flex-col h-full md:relative md:z-auto md:flex"
+        style={{ paddingTop: "env(safe-area-inset-top)" }}
+      >
         <div className="p-4 pb-2">
           <h1 className="font-mono text-sm font-semibold tracking-widest uppercase text-fg-muted">
             BuJo
           </h1>
         </div>
 
-        <nav className="flex-1 px-2 py-2 space-y-0.5">
+        <nav className="flex-1 px-2 py-2 space-y-0.5 overflow-y-auto">
           {NAV_ITEMS.map((item) => {
             const active = pathname.startsWith(item.href.split("/").slice(0, 2).join("/"));
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
+                className={`flex items-center gap-3 px-3 py-3 rounded-md text-sm transition-colors ${
                   active
                     ? "bg-accent-soft text-fg font-medium"
                     : "text-fg-muted hover:text-fg hover:bg-accent-soft/50"
@@ -85,7 +101,7 @@ export default function Sidebar() {
               <Link
                 key={col.id}
                 href={`/collections/${col.id.replace("collection-", "")}`}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm text-fg-muted hover:text-fg hover:bg-accent-soft/50 transition-colors"
+                className="flex items-center gap-2 px-3 py-3 rounded-md text-sm text-fg-muted hover:text-fg hover:bg-accent-soft/50 transition-colors"
               >
                 <span className="text-xs">{col.label.charAt(0)}</span>
                 <span>{col.label}</span>
@@ -98,9 +114,15 @@ export default function Sidebar() {
           <CalendarHeatmap />
         </div>
 
-        <div className="p-3 border-t border-border">
-          <p className="text-[10px] font-mono text-fg-faint text-center">
+        <div
+          className="p-3 border-t border-border"
+          style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0.75rem)" }}
+        >
+          <p className="text-[10px] font-mono text-fg-faint text-center hidden md:block">
             ⌘K search · ? shortcuts
+          </p>
+          <p className="text-[10px] font-mono text-fg-faint text-center md:hidden">
+            tap to navigate
           </p>
         </div>
       </aside>

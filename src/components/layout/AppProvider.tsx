@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, ReactNode } from "react";
+import { useEffect, useRef, ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { useBulletStore } from "@/lib/store/bulletStore";
 import { useNavigationStore } from "@/lib/store/navigationStore";
 import { prevDay, nextDay, prevMonth, nextMonth, todayISO, currentMonthISO } from "@/lib/dates";
@@ -8,11 +9,15 @@ import Sidebar from "./Sidebar";
 import CommandPalette from "./CommandPalette";
 import ShortcutHelp from "./ShortcutHelp";
 import UndoToast from "./UndoToast";
+import BottomTabBar from "./BottomTabBar";
 
 export default function AppProvider({ children }: { children: ReactNode }) {
   const hydrate = useBulletStore((s) => s.hydrate);
   const hydrated = useBulletStore((s) => s.hydrated);
   const theme = useNavigationStore((s) => s.theme);
+  const router = useRouter();
+  const routerRef = useRef(router);
+  routerRef.current = router;
 
   useEffect(() => {
     hydrate();
@@ -53,7 +58,7 @@ export default function AppProvider({ children }: { children: ReactNode }) {
         pending = "";
         const nav = (path: string) => {
           e.preventDefault();
-          window.location.href = path;
+          routerRef.current.push(path);
         };
         switch (e.key) {
           case "d": nav(`/daily/${todayISO()}`); return;
@@ -75,21 +80,19 @@ export default function AppProvider({ children }: { children: ReactNode }) {
         const path = window.location.pathname;
         const isNext = e.key === "ArrowRight" || e.key === "]";
 
-        // Daily log: /daily/YYYY-MM-DD
-        const dailyMatch = path.match(/^\/daily\/(\d{4}-\d{2}-\d{2})$/);
+        const dailyMatch = path.match(/^\/daily\/(\d{4}-\d{2}-\d{2})/);
         if (dailyMatch) {
           e.preventDefault();
           const date = dailyMatch[1];
-          window.location.href = `/daily/${isNext ? nextDay(date) : prevDay(date)}`;
+          routerRef.current.push(`/daily/${isNext ? nextDay(date) : prevDay(date)}`);
           return;
         }
 
-        // Monthly log: /monthly/YYYY-MM
-        const monthlyMatch = path.match(/^\/monthly\/(\d{4}-\d{2})$/);
+        const monthlyMatch = path.match(/^\/monthly\/(\d{4}-\d{2})/);
         if (monthlyMatch) {
           e.preventDefault();
           const month = monthlyMatch[1];
-          window.location.href = `/monthly/${isNext ? nextMonth(month) : prevMonth(month)}`;
+          routerRef.current.push(`/monthly/${isNext ? nextMonth(month) : prevMonth(month)}`);
           return;
         }
       }
@@ -97,12 +100,56 @@ export default function AppProvider({ children }: { children: ReactNode }) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Touch swipe gestures for day/month navigation
+  useEffect(() => {
+    let startX = 0;
+    let startY = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      const dx = e.changedTouches[0].clientX - startX;
+      const dy = e.changedTouches[0].clientY - startY;
+
+      // Only act on clearly horizontal swipes with enough distance
+      if (Math.abs(dx) < 80 || Math.abs(dx) < Math.abs(dy) * 2) return;
+
+      const path = window.location.pathname;
+      const isNext = dx < 0; // swipe left → next
+
+      const dailyMatch = path.match(/^\/daily\/(\d{4}-\d{2}-\d{2})/);
+      if (dailyMatch) {
+        const date = dailyMatch[1];
+        routerRef.current.push(`/daily/${isNext ? nextDay(date) : prevDay(date)}`);
+        return;
+      }
+
+      const monthlyMatch = path.match(/^\/monthly\/(\d{4}-\d{2})/);
+      if (monthlyMatch) {
+        const month = monthlyMatch[1];
+        routerRef.current.push(`/monthly/${isNext ? nextMonth(month) : prevMonth(month)}`);
+        return;
+      }
+    };
+
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+    return () => {
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!hydrated) {
     return (
       <div className="flex items-center justify-center h-screen bg-bg">
-        <div className="font-mono text-sm text-fg-muted animate-pulse">Loading...</div>
+        <div className="font-mono text-sm text-fg-muted animate-pulse">Loading…</div>
       </div>
     );
   }
@@ -110,7 +157,10 @@ export default function AppProvider({ children }: { children: ReactNode }) {
   return (
     <div className="flex h-screen bg-bg">
       <Sidebar />
-      {children}
+      <div className="flex-1 flex flex-col min-w-0">
+        {children}
+        <BottomTabBar />
+      </div>
       <CommandPalette />
       <ShortcutHelp />
       <UndoToast />

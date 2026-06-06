@@ -1,18 +1,17 @@
-"use client";
+import CollectionPageClient from "./CollectionPageClient";
 
-import { use } from "react";
-import PageShell from "@/components/layout/PageShell";
-import CollectionView from "@/components/modules/CollectionView";
-import { useBulletStore } from "@/lib/store/bulletStore";
+// Collections are user-generated at runtime. We pre-render a placeholder so the
+// static export accepts this dynamic route; the client-side router renders the
+// actual collection for any real ID without needing a pre-built HTML file.
+export async function generateStaticParams() {
+  return [{ id: "_" }];
+}
 
-export default function CollectionPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
-  const scope = useBulletStore((s) => s.scopes[`collection-${id}`]);
-  const name = scope?.label || "Collection";
-
-  return (
-    <PageShell title={name} subtitle="Collection">
-      <CollectionView id={id} name={name} />
-    </PageShell>
-  );
+export default async function CollectionPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  return <CollectionPageClient id={id} />;
 }
