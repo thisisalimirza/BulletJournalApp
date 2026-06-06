@@ -2,7 +2,7 @@
   "name": "BuJo — Digital Bullet Journal",
   "short_name": "BuJo",
   "description": "A beautiful, keyboard-first digital bullet journal",
-  "start_url": "/",
+  "start_url": "/launch",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
