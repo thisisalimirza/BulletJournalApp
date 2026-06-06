@@ -12,6 +12,10 @@ export const metadata: Metadata = {
   },
   applicationName: "BuJo",
   formatDetection: { telephone: false },
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/manifest.json",
 };
 
 export const viewport: Viewport = {
